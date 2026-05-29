@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://df2m1x7a98y4c"]
 
 [ext_resource type="Script" path="res://Scripts/Entities/Enemy.gd" id="1_enemy"]
-[ext_resource type="PackedScene" uid="uid://dj4n0d0y1y023" path="res://Assets/Models/character.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://Assets/Models/chicken.glb" id="2_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_y1b2a"]
 radius = 0.4
@@ -17,8 +17,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CapsuleShape3D_y1b2a")
 
 [node name="ModelRoot" type="Node3D" parent="."]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
 
-[node name="character" parent="ModelRoot" instance=ExtResource("2_model")]
-
-
+[node name="chicken" parent="ModelRoot" instance=ExtResource("2_model")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)

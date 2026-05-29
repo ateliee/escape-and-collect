@@ -12,8 +12,9 @@ func _ready():
 	if players.size() > 0:
 		player = players[0]
 	
-	# Make enemy look a bit different by coloring it red if possible, or just scale it slightly
-	model.scale = Vector3(1.1, 1.1, 1.1)
+	# (Removed hardcoded scale)
+
+var time_passed: float = 0.0
 
 func _physics_process(delta):
 	if not is_instance_valid(player):
@@ -31,10 +32,18 @@ func _physics_process(delta):
 	velocity.x = dir.x * SPEED
 	velocity.z = dir.z * SPEED
 
-	# Rotate to face movement
+	# Rotate to face movement and animate
 	if velocity.length_squared() > 0.1:
 		var look_dir = atan2(-velocity.x, -velocity.z)
 		model.rotation.y = lerp_angle(model.rotation.y, look_dir, 10 * delta)
+		
+		# Procedural hopping/wobbling animation
+		time_passed += delta * 15.0
+		model.position.y = abs(sin(time_passed * 0.5)) * 0.3
+		model.rotation.z = sin(time_passed) * 0.15
+	else:
+		model.position.y = lerp(model.position.y, 0.0, 10 * delta)
+		model.rotation.z = lerp(model.rotation.z, 0.0, 10 * delta)
 
 	move_and_slide()
 	

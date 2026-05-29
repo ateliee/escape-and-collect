@@ -4,7 +4,7 @@ signal game_over
 signal score_changed(new_score)
 
 var score: int = 0
-var max_enemies = 15
+var max_enemies = 40
 var current_enemies = 0
 
 var enemy_scene = preload("res://Scenes/Entities/Enemy.tscn")
@@ -20,13 +20,15 @@ func _ready():
 	player.position = Vector3(0, 2, 0)
 	add_child(player)
 	
-	# Spawn initial coins
+	# Spawn initial coins and enemies
 	for i in range(5):
 		spawn_coin()
+	for i in range(3):
+		_on_enemy_spawn_timer()
 		
 	# Start spawn timers
 	var enemy_timer = Timer.new()
-	enemy_timer.wait_time = 4.0
+	enemy_timer.wait_time = 1.5
 	enemy_timer.autostart = true
 	enemy_timer.timeout.connect(_on_enemy_spawn_timer)
 	add_child(enemy_timer)

@@ -32,6 +32,10 @@ func _setup_ragdoll():
 	create_limb("ArmL", Vector3(-0.6, 0.6, 0), false)
 	# Right Arm
 	create_limb("ArmR", Vector3(0.6, 0.6, 0), false)
+	# Left Leg
+	create_limb("LegL", Vector3(-0.3, -0.7, 0), false)
+	# Right Leg
+	create_limb("LegR", Vector3(0.3, -0.7, 0), false)
 
 func create_limb(limb_name: String, offset: Vector3, is_head: bool):
 	var rb = RigidBody3D.new()
@@ -46,6 +50,10 @@ func create_limb(limb_name: String, offset: Vector3, is_head: bool):
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = Color(0.3, 0.6, 0.9)
 	
+	var phys_mat = PhysicsMaterial.new()
+	phys_mat.friction = 0.0
+	rb.physics_material_override = phys_mat
+	
 	if is_head:
 		var sphere = SphereMesh.new()
 		sphere.radius = 0.3
@@ -56,13 +64,25 @@ func create_limb(limb_name: String, offset: Vector3, is_head: bool):
 		shape.radius = 0.3
 		col.shape = shape
 	else:
-		var box = BoxMesh.new()
-		box.size = Vector3(0.2, 0.7, 0.2)
-		box.material = mat
-		mesh_inst.mesh = box
-		var shape = BoxShape3D.new()
-		shape.size = box.size
-		col.shape = shape
+		var is_leg = "Leg" in limb_name
+		if is_leg:
+			var cap = CapsuleMesh.new()
+			cap.radius = 0.15
+			cap.height = 0.6
+			cap.material = mat
+			mesh_inst.mesh = cap
+			var shape = CapsuleShape3D.new()
+			shape.radius = 0.15
+			shape.height = 0.6
+			col.shape = shape
+		else:
+			var box = BoxMesh.new()
+			box.size = Vector3(0.2, 0.7, 0.2)
+			box.material = mat
+			mesh_inst.mesh = box
+			var shape = BoxShape3D.new()
+			shape.size = box.size
+			col.shape = shape
 		
 	rb.add_child(mesh_inst)
 	rb.add_child(col)
@@ -74,12 +94,14 @@ func create_limb(limb_name: String, offset: Vector3, is_head: bool):
 	var joint = PinJoint3D.new()
 	get_parent().add_child(joint)
 	# Place joint between torso and limb
-	joint.global_position = self.global_position + offset * 0.8
 	if is_head:
 		joint.global_position = self.global_position + Vector3(0, 1.0, 0)
-	else:
+	elif "Arm" in limb_name:
 		# Arm joints closer to shoulders
 		joint.global_position = self.global_position + Vector3(offset.x * 0.7, 0.8, 0)
+	elif "Leg" in limb_name:
+		# Leg joints closer to hips
+		joint.global_position = self.global_position + Vector3(offset.x * 0.7, 0.1, 0)
 		
 	joint.node_a = self.get_path()
 	joint.node_b = rb.get_path()
@@ -102,7 +124,19 @@ func _physics_process(delta):
 	var speed_limit = DASH_MAX_SPEED if is_dashing else MAX_SPEED
 
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction = Vector3(input_dir.x, 0, input_dir.y).normalized()
+	var direction = Vector3.ZERO
+	
+	if input_dir.length() > 0:
+		var cam_basis = spring_arm.global_transform.basis
+		var cam_forward = -cam_basis.z
+		cam_forward.y = 0
+		cam_forward = cam_forward.normalized()
+		
+		var cam_right = cam_basis.x
+		cam_right.y = 0
+		cam_right = cam_right.normalized()
+		
+		direction = (cam_right * input_dir.x - cam_forward * input_dir.y).normalized()
 	
 	# Apply force for movement
 	if direction.length() > 0:
@@ -120,9 +154,14 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("jump") and abs(linear_velocity.y) < 0.1 and global_position.y < 1.0:
 		apply_central_impulse(Vector3.UP * JUMP_IMPULSE)
 
-func _process(_delta):
+func _process(delta):
 	# Update camera position in _process for smooth rendering, preserving the Y offset
 	spring_arm.global_position = self.global_position + Vector3(0, 1.5, 0)
+	
+	# Smoothly rotate the camera to follow the player's facing direction
+	# Only do this if the player is actually moving/facing a clear direction
+	if linear_velocity.length_squared() > 0.5:
+		spring_arm.rotation.y = lerp_angle(spring_arm.rotation.y, rotation.y, 2.0 * delta)
 
 func die():
 	var world = get_parent()
