@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://cx1b2c3d4e5f"]
+
+[ext_resource type="Script" path="res://Scripts/Game/World.gd" id="1_world"]
+[ext_resource type="PackedScene" uid="uid://bsn0b0x0y0y01" path="res://Assets/Models/platform-large.glb" id="2_floor"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_a1b2c"]
+agent_height = 1.0
+agent_radius = 0.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_f1b2"]
+size = Vector3(40, 1, 40)
+
+[node name="World" type="Node3D" groups=["world"]]
+script = ExtResource("1_world")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+shadow_enabled = true
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_a1b2c")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_f1b2")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(40, 1, 40)

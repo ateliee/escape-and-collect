@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://df2m1x7a98y4c"]
+
+[ext_resource type="Script" path="res://Scripts/Entities/Enemy.gd" id="1_enemy"]
+[ext_resource type="PackedScene" uid="uid://dj4n0d0y1y023" path="res://Assets/Models/character.glb" id="2_model"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_y1b2a"]
+radius = 0.4
+height = 1.0
+
+[node name="Enemy" type="CharacterBody3D" groups=["enemy"]]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_enemy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CapsuleShape3D_y1b2a")
+
+[node name="ModelRoot" type="Node3D" parent="."]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
+
+[node name="character" parent="ModelRoot" instance=ExtResource("2_model")]
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+avoidance_enabled = true
