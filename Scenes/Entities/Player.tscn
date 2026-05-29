@@ -1,27 +1,38 @@
 [gd_scene load_steps=5 format=3 uid="uid://cy81h46a78i2e"]
 
 [ext_resource type="Script" path="res://Scripts/Entities/Player.gd" id="1_player"]
-[ext_resource type="PackedScene" uid="uid://dj4n0d0y1y023" path="res://Assets/Models/character.glb" id="2_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_y1b2a"]
 radius = 0.4
 height = 1.0
 
-[node name="Player" type="CharacterBody3D" groups=["player"]]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
+albedo_color = Color(0.2, 0.5, 0.8, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+material = SubResource("StandardMaterial3D_blue")
+radius = 0.4
+height = 1.0
+
+[node name="Player" type="RigidBody3D" groups=["player"]]
 collision_layer = 2
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+mass = 5.0
+can_sleep = false
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CapsuleShape3D_y1b2a")
 
-[node name="ModelRoot" type="Node3D" parent="."]
-
-[node name="character" parent="ModelRoot" instance=ExtResource("2_model")]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("CapsuleMesh_body")
 
 [node name="SpringArm3D" type="SpringArm3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 1.5, 0)
-spring_length = 5.0
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, 0, 1.5, 0)
+spring_length = 7.0
 margin = 0.5
 
 [node name="Camera3D" type="Camera3D" parent="SpringArm3D"]

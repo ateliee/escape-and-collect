@@ -1,41 +1,91 @@
-extends CharacterBody3D
+extends RigidBody3D
 
-const SPEED = 5.0
-const DASH_SPEED = 15.0
-const JUMP_VELOCITY = 6.0
+const MOVE_FORCE = 30.0
+const DASH_FORCE_MULTIPLIER = 2.5
+const MAX_SPEED = 6.0
+const DASH_MAX_SPEED = 12.0
+const JUMP_IMPULSE = 25.0
 const DASH_DURATION = 0.3
 const DASH_COOLDOWN = 1.0
-
-# Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var is_dashing = false
 var dash_timer = 0.0
 var dash_cooldown_timer = 0.0
 
 @onready var spring_arm = $SpringArm3D
-@onready var model = $ModelRoot # We'll put the glb instance here
+var limbs = []
 
 func _ready():
-	# Configure spring arm for 3rd person
-	pass
+	# Ensure camera is top down and detached from torso rotation
+	spring_arm.top_level = true
+	spring_arm.rotation_degrees = Vector3(-45, 0, 0)
+	spring_arm.spring_length = 7.0
+	
+	# Delay ragdoll generation slightly to ensure world is ready
+	call_deferred("_setup_ragdoll")
 
-func _unhandled_input(event):
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * 0.005)
-		spring_arm.rotate_x(-event.relative.y * 0.005)
-		spring_arm.rotation.x = clamp(spring_arm.rotation.x, -PI/4, PI/4)
+func _setup_ragdoll():
+	# Create limbs
+	# Head
+	create_limb("Head", Vector3(0, 1.2, 0), true)
+	# Left Arm
+	create_limb("ArmL", Vector3(-0.6, 0.6, 0), false)
+	# Right Arm
+	create_limb("ArmR", Vector3(0.6, 0.6, 0), false)
+
+func create_limb(limb_name: String, offset: Vector3, is_head: bool):
+	var rb = RigidBody3D.new()
+	rb.name = limb_name
+	rb.collision_layer = 0 # Don't collide with enemies directly
+	rb.collision_mask = 1 # Collide with floor
+	rb.mass = 0.5
+	
+	var mesh_inst = MeshInstance3D.new()
+	var col = CollisionShape3D.new()
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(0.3, 0.6, 0.9)
+	
+	if is_head:
+		var sphere = SphereMesh.new()
+		sphere.radius = 0.3
+		sphere.height = 0.6
+		sphere.material = mat
+		mesh_inst.mesh = sphere
+		var shape = SphereShape3D.new()
+		shape.radius = 0.3
+		col.shape = shape
+	else:
+		var box = BoxMesh.new()
+		box.size = Vector3(0.2, 0.7, 0.2)
+		box.material = mat
+		mesh_inst.mesh = box
+		var shape = BoxShape3D.new()
+		shape.size = box.size
+		col.shape = shape
+		
+	rb.add_child(mesh_inst)
+	rb.add_child(col)
+	
+	get_parent().add_child(rb)
+	rb.global_position = self.global_position + offset
+	limbs.append(rb)
+	
+	var joint = PinJoint3D.new()
+	get_parent().add_child(joint)
+	# Place joint between torso and limb
+	joint.global_position = self.global_position + offset * 0.8
+	if is_head:
+		joint.global_position = self.global_position + Vector3(0, 1.0, 0)
+	else:
+		# Arm joints closer to shoulders
+		joint.global_position = self.global_position + Vector3(offset.x * 0.7, 0.8, 0)
+		
+	joint.node_a = self.get_path()
+	joint.node_b = rb.get_path()
 
 func _physics_process(delta):
-	# Add the gravity.
-	if not is_on_floor():
-		velocity.y -= gravity * delta
-
-	# Handle jump.
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-
-	# Handle dash
+	# Handle dash timers
 	if dash_cooldown_timer > 0:
 		dash_cooldown_timer -= delta
 		
@@ -48,27 +98,33 @@ func _physics_process(delta):
 		dash_timer = DASH_DURATION
 		dash_cooldown_timer = DASH_COOLDOWN
 
-	var current_speed = DASH_SPEED if is_dashing else SPEED
+	var force_mult = DASH_FORCE_MULTIPLIER if is_dashing else 1.0
+	var speed_limit = DASH_MAX_SPEED if is_dashing else MAX_SPEED
 
-	# Get the input direction and handle the movement/deceleration.
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var direction = Vector3(input_dir.x, 0, input_dir.y).normalized()
 	
-	if direction:
-		velocity.x = direction.x * current_speed
-		velocity.z = direction.z * current_speed
-		# Rotate model to face movement direction
-		var look_dir = atan2(-velocity.x, -velocity.z)
-		model.rotation.y = lerp_angle(model.rotation.y, look_dir - rotation.y, 10 * delta)
-	else:
-		velocity.x = move_toward(velocity.x, 0, current_speed)
-		velocity.z = move_toward(velocity.z, 0, current_speed)
+	# Apply force for movement
+	if direction.length() > 0:
+		var current_horiz_vel = Vector3(linear_velocity.x, 0, linear_velocity.z)
+		if current_horiz_vel.length() < speed_limit:
+			apply_central_force(direction * MOVE_FORCE * force_mult * mass)
+			
+		# Rotate visual facing towards movement using angular velocity
+		var target_angle = atan2(-direction.x, -direction.z)
+		var angle_diff = wrapf(target_angle - rotation.y, -PI, PI)
+		angular_velocity.y = angle_diff * 10.0
 
-	move_and_slide()
+	# Handle jump (check if on floor is tricky for RigidBody, using raycast or contact points is better)
+	# For simplicity, we just allow jump if Y velocity is close to 0 and we are near Y=0.5
+	if Input.is_action_just_pressed("jump") and abs(linear_velocity.y) < 0.1 and global_position.y < 1.0:
+		apply_central_impulse(Vector3.UP * JUMP_IMPULSE)
 
-# Called by enemy when touching player
+func _process(_delta):
+	# Update camera position in _process for smooth rendering, preserving the Y offset
+	spring_arm.global_position = self.global_position + Vector3(0, 1.5, 0)
+
 func die():
-	# Inform world
 	var world = get_parent()
 	if world.has_method("trigger_game_over"):
 		world.trigger_game_over()

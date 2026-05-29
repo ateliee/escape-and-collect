@@ -1,32 +1,33 @@
-[gd_scene load_steps=5 format=3 uid="uid://cx1b2c3d4e5f"]
+[gd_scene load_steps=5 format=3 uid="uid://cx4j1n0d0y1y0"]
 
 [ext_resource type="Script" path="res://Scripts/Game/World.gd" id="1_world"]
-[ext_resource type="PackedScene" uid="uid://bsn0b0x0y0y01" path="res://Assets/Models/platform-large.glb" id="2_floor"]
 
-[sub_resource type="NavigationMesh" id="NavigationMesh_a1b2c"]
-agent_height = 1.0
-agent_radius = 0.5
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_f1b2"]
-size = Vector3(40, 1, 40)
+[sub_resource type="Sky" id="Sky_y1b2a"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
 
-[node name="World" type="Node3D" groups=["world"]]
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 2
+sky = SubResource("Sky_y1b2a")
+ambient_light_source = 3
+ambient_light_color = Color(0.5, 0.5, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.2, 0.6, 0.3, 1)
+
+[node name="World" type="Node3D"]
 script = ExtResource("1_world")
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_env")
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 10, 0)
 shadow_enabled = true
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
-navigation_mesh = SubResource("NavigationMesh_a1b2c")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
+[node name="Floor" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-shape = SubResource("BoxShape3D_f1b2")
-
-[node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-size = Vector3(40, 1, 40)
+use_collision = true
+size = Vector3(200, 1, 200)
+material = SubResource("StandardMaterial3D_floor")

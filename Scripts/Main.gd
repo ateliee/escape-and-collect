@@ -20,6 +20,8 @@ func change_state(new_state: GameState):
 	if current_ui:
 		current_ui.queue_free()
 	if current_world and new_state != GameState.GAME_OVER:
+		if current_world.game_over.is_connected(_on_game_over):
+			current_world.game_over.disconnect(_on_game_over)
 		current_world.queue_free()
 		current_world = null
 		
@@ -36,8 +38,8 @@ func change_state(new_state: GameState):
 			current_world.game_over.connect(_on_game_over)
 			current_world.score_changed.connect(_on_score_changed)
 			
-			# Add HUD later or manage it here
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			# We don't need to capture the mouse anymore since we have a fixed camera
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		GameState.GAME_OVER:
 			current_ui = game_over_scene.instantiate()
 			add_child(current_ui)
@@ -50,12 +52,15 @@ func _on_start_pressed():
 
 func _on_retry_pressed():
 	if current_world:
+		if current_world.game_over.is_connected(_on_game_over):
+			current_world.game_over.disconnect(_on_game_over)
 		current_world.queue_free()
 		current_world = null
 	change_state(GameState.PLAYING)
 
 func _on_game_over():
-	change_state(GameState.GAME_OVER)
+	if current_state == GameState.PLAYING:
+		change_state(GameState.GAME_OVER)
 
 func _on_score_changed(new_score):
 	score = new_score
@@ -64,4 +69,3 @@ func _on_score_changed(new_score):
 func _unhandled_input(event):
 	if event.is_action_pressed("ui_cancel"):
 		get_tree().quit()
-
