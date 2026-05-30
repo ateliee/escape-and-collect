@@ -11,3 +11,6 @@ export_presets.cfg
 *.apk
 *.ipa
 *.aab
+
+# Dependencies
+output

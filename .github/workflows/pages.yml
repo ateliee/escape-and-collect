@@ -23,7 +23,7 @@ jobs:
       image: barichello/godot-ci:4.2.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           lfs: true
           
@@ -35,17 +35,17 @@ jobs:
       - name: Web Build
         run: |
           mkdir -v -p build/web
-          godot --headless --export-release "Web" build/web/index.html
+          godot --headless --export-release "Web" output/web/index.html
           
       - name: Add coi-serviceworker (Required for Godot 4 HTML5)
         run: |
-          wget https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.js -O build/web/coi-serviceworker.js
-          sed -i 's#</head>#<script src="coi-serviceworker.js"></script></head>#g' build/web/index.html
+          wget https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.js -O output/web/coi-serviceworker.js
+          sed -i 's#</head>#<script src="coi-serviceworker.js"></script></head>#g' output/web/index.html
           
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: build/web
+          path: output/web
 
   deploy-page:
     environment:
@@ -56,4 +56,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
