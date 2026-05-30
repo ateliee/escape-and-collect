@@ -15,7 +15,7 @@ var player: Node3D
 @onready var floor_node = $Floor
 
 var debug_btn: Button
-var is_debug_sphere_on = false
+var is_debug_sphere_on = true
 
 func _ready():
 	# Spawn player
@@ -64,6 +64,12 @@ func _ready():
 		debug_btn.pressed.connect(_on_debug_toggle)
 		canvas.add_child(debug_btn)
 		_update_debug_btn_visuals()
+		
+		# Sync initial state for all entities
+		get_tree().call_group("player", "toggle_debug", is_debug_sphere_on)
+		get_tree().call_group("enemy", "toggle_debug", is_debug_sphere_on)
+		get_tree().call_group("chick", "toggle_debug", is_debug_sphere_on)
+		get_tree().call_group("egg", "toggle_debug", is_debug_sphere_on)
 
 func _update_debug_btn_visuals():
 	if is_debug_sphere_on:
@@ -77,10 +83,10 @@ func _on_debug_toggle():
 	is_debug_sphere_on = not is_debug_sphere_on
 	_update_debug_btn_visuals()
 	
-	var enemies = get_tree().get_nodes_in_group("enemy")
-	for enemy in enemies:
-		if enemy.has_method("toggle_debug"):
-			enemy.toggle_debug(is_debug_sphere_on)
+	get_tree().call_group("player", "toggle_debug", is_debug_sphere_on)
+	get_tree().call_group("enemy", "toggle_debug", is_debug_sphere_on)
+	get_tree().call_group("chick", "toggle_debug", is_debug_sphere_on)
+	get_tree().call_group("egg", "toggle_debug", is_debug_sphere_on)
 
 func _process(_delta):
 	if is_instance_valid(player):

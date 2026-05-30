@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://d2r0b4iaq8k2v"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hatch"]
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.4, 1)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_hatch"]
+direction = Vector3(0, 1, 0)
+spread = 60.0
+initial_velocity_min = 3.0
+initial_velocity_max = 5.0
+scale_min = 0.5
+scale_max = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_hatch"]
+radius = 0.1
+height = 0.2
+
+[sub_resource type="GDScript" id="GDScript_auto_free"]
+script/source = "extends GPUParticles3D
+
+func _ready():
+	emitting = true
+	await get_tree().create_timer(1.0).timeout
+	queue_free()
+"
+
+[node name="EggHatchEffect" type="GPUParticles3D"]
+material_override = SubResource("StandardMaterial3D_hatch")
+emitting = false
+amount = 12
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_hatch")
+draw_pass_1 = SubResource("SphereMesh_hatch")
+script = SubResource("GDScript_auto_free")

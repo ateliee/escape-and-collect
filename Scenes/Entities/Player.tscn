@@ -2,6 +2,12 @@
 
 [ext_resource type="Script" path="res://Scripts/Entities/Player.gd" id="1_player"]
 [ext_resource type="PackedScene" path="res://Assets/Models/chicken.glb" id="2_chicken"]
+[ext_resource type="Material" uid="uid://debugmat0001" path="res://Assets/Materials/DebugMaterial.tres" id="1_debug_mat"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_player_debug"]
+material = ExtResource("1_debug_mat")
+radius = 0.4
+height = 1.0
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_y1b2a"]
 radius = 0.4
 height = 1.0
@@ -10,7 +16,7 @@ height = 1.0
 albedo_color = Color(0.2, 0.5, 0.8, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-material = SubResource("StandardMaterial3D_blue")
+material = ExtResource("1_debug_mat")
 radius = 0.4
 height = 1.0
 
@@ -38,15 +44,6 @@ spring_length = 15.0
 margin = 0.5
 
 [node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
-transparency = 1
-albedo_color = Color(0, 0, 1, 0.4)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_player_debug"]
-material = SubResource("StandardMaterial3D_blue")
-radius = 0.4
-height = 1.0
 
 [node name="DebugMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

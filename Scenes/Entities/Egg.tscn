@@ -2,11 +2,17 @@
 
 [ext_resource type="Script" path="res://Scripts/Entities/Egg.gd" id="1_egg"]
 [ext_resource type="PackedScene" path="res://Assets/Models/egg.glb" id="2_model"]
+[ext_resource type="Material" uid="uid://debugmat0001" path="res://Assets/Materials/DebugMaterial.tres" id="1_debug_mat"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_egg_debug"]
+material = ExtResource("1_debug_mat")
+radius = 0.3
+height = 0.6
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_egg"]
 radius = 0.3
 
-[node name="Egg" type="RigidBody3D"]
+[node name="Egg" type="RigidBody3D" groups=["egg"]]
 collision_layer = 8
 collision_mask = 1
 script = ExtResource("1_egg")
@@ -18,3 +24,6 @@ shape = SubResource("SphereShape3D_egg")
 transform = Transform3D(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0, 0, 0, 0)
 
 [node name="egg" parent="ModelRoot" instance=ExtResource("2_model")]
+
+[node name="DebugMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_egg_debug")

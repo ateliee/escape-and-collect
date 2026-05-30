@@ -36,6 +36,8 @@ func hatch():
 	hatched = true
 	
 	var chick = chick_scene.instantiate()
+	if chick.has_method("toggle_debug"):
+		chick.toggle_debug(is_debug_on)
 	get_parent().call_deferred("add_child", chick)
 	chick.global_position = global_position
 	
@@ -43,6 +45,8 @@ func hatch():
 	
 	queue_free()
 
+var is_debug_on = true
 func toggle_debug(show: bool):
+	is_debug_on = show
 	if has_node("DebugMesh"):
 		$DebugMesh.visible = show

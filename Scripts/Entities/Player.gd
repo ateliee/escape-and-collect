@@ -95,6 +95,8 @@ func throw_egg():
 	throw_dir.y = 1.0 # arc upwards
 	egg.linear_velocity = throw_dir.normalized() * throw_force
 	
+	if egg.has_method("toggle_debug"):
+		egg.toggle_debug(is_debug_on)
 	get_parent().call_deferred("add_child", egg)
 	
 func _process(delta):
@@ -121,6 +123,8 @@ func die():
 	if world.has_method("trigger_game_over"):
 		world.trigger_game_over()
 
+var is_debug_on = true
 func toggle_debug(show: bool):
+	is_debug_on = show
 	if has_node("DebugMesh"):
 		$DebugMesh.visible = show

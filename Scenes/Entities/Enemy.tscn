@@ -2,17 +2,14 @@
 
 [ext_resource type="Script" uid="uid://dp4kwij5tf5oy" path="res://Scripts/Entities/Enemy.gd" id="1_enemy"]
 [ext_resource type="PackedScene" uid="uid://b7h67scv4ncny" path="res://Assets/Models/dog.glb" id="2_model"]
+[ext_resource type="Material" uid="uid://debugmat0001" path="res://Assets/Materials/DebugMaterial.tres" id="1_debug_mat"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_y1b2a"]
 radius = 0.92626953
 height = 1.8525391
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_red"]
-transparency = 1
-albedo_color = Color(1, 0, 0, 0.4)
-
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_debug"]
-material = SubResource("StandardMaterial3D_red")
+material = ExtResource("1_debug_mat")
 radius = 0.4
 height = 1.0
 
