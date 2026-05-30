@@ -14,7 +14,7 @@ var minimap_scene = preload("res://Scenes/UI/Minimap.tscn")
 
 var player: Node3D
 var debug_btn: Button
-var is_debug_sphere_on = true
+var is_debug_sphere_on = false
 var chick_count_label: Label
 
 @onready var floor_node = $Floor

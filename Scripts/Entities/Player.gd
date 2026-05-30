@@ -12,7 +12,7 @@ var is_dashing = false
 var dash_timer = 0.0
 var dash_cooldown_timer = 0.0
 var throw_cooldown = 0.0
-var is_debug_on = true
+var is_debug_on = false
 
 var egg_scene = preload("res://Scenes/Entities/Egg.tscn")
 

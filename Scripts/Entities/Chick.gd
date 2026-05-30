@@ -24,8 +24,8 @@ func _ready():
 	var vision_mesh = MeshInstance3D.new()
 	vision_mesh.name = "VisionMesh"
 	var sphere_mesh = SphereMesh.new()
-	sphere_mesh.radius = 10.0
-	sphere_mesh.height = 20.0
+	sphere_mesh.radius = 5.0
+	sphere_mesh.height = 10.0
 	var mat = StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_color = Color(1.0, 0.5, 0.0, 0.15)  # Orange for alert
@@ -44,8 +44,8 @@ func _physics_process(delta):
 	# 1. State check
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	var closest_enemy = null
-	# Hysteresis: If already fleeing, keep fleeing until enemy is > 15m away
-	var closest_enemy_dist = 15.0 if current_state == "flee" else 10.0
+	# Hysteresis: If already fleeing, keep fleeing until enemy is > 8m away
+	var closest_enemy_dist = 8.0 if current_state == "flee" else 5.0
 
 	for e in enemies:
 		if not is_instance_valid(e):

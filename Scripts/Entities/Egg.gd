@@ -3,7 +3,7 @@ extends RigidBody3D
 var chick_scene = preload("res://Scenes/Entities/Chick.tscn")
 var hatched = false
 var can_hatch = false
-var is_debug_on = true
+var is_debug_on = false
 
 
 func _ready():
