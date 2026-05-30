@@ -2,28 +2,33 @@ extends CharacterBody3D
 
 const SPEED = 3.0
 
+var player: Node3D = null
+var time_passed: float = 0.0
+var state_timer: float = 0.0
+var wander_dir: Vector3 = Vector3.ZERO
+var is_wandering: bool = false
+
 @onready var model = $ModelRoot
 
-var player: Node3D = null
 
 func _ready():
 	# Find player
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		player = players[0]
-		
+
 	# Setup eat hitbox
 	var eat_area = Area3D.new()
 	eat_area.collision_layer = 0
-	eat_area.collision_mask = 16 # Layer 5 (Chicks)
+	eat_area.collision_mask = 16  # Layer 5 (Chicks)
 	var eat_shape = CollisionShape3D.new()
 	var sphere = SphereShape3D.new()
-	sphere.radius = 1.2 # Eat radius
+	sphere.radius = 1.2  # Eat radius
 	eat_shape.shape = sphere
 	eat_area.add_child(eat_shape)
 	add_child(eat_area)
 	eat_area.body_entered.connect(_on_eat_area_entered)
-	
+
 	# Setup vision visualizer
 	var vision_mesh = MeshInstance3D.new()
 	vision_mesh.name = "VisionMesh"
@@ -39,6 +44,7 @@ func _ready():
 	vision_mesh.visible = false
 	add_child(vision_mesh)
 
+
 func _on_eat_area_entered(body: Node3D):
 	if body.is_in_group("chick"):
 		var effect = preload("res://Scenes/Entities/EggHatchEffect.tscn").instantiate()
@@ -46,30 +52,26 @@ func _on_eat_area_entered(body: Node3D):
 		get_parent().call_deferred("add_child", effect)
 		body.queue_free()
 
-	
 	# (Removed hardcoded scale)
 
-var time_passed: float = 0.0
-var state_timer: float = 0.0
-var wander_dir: Vector3 = Vector3.ZERO
-var is_wandering: bool = false
 
 func _physics_process(delta):
 	if not is_instance_valid(player):
 		return
-		
+
 	# Add gravity
 	if not is_on_floor():
 		velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
 
 	# Find closest valid target within vision range (Chicks only)
 	var targets = get_tree().get_nodes_in_group("chick")
-		
+
 	var closest_target = null
-	var closest_dist = 15.0 # Vision radius
-	
+	var closest_dist = 15.0  # Vision radius
+
 	for t in targets:
-		if not is_instance_valid(t): continue
+		if not is_instance_valid(t):
+			continue
 		var dist = global_position.distance_to(t.global_position)
 		if dist < closest_dist:
 			closest_dist = dist
@@ -77,7 +79,7 @@ func _physics_process(delta):
 
 	# Pursuit towards target if found
 	if closest_target:
-		var dir = (closest_target.global_position - global_position)
+		var dir = closest_target.global_position - global_position
 		dir.y = 0
 		if dir.length() > 0.1:
 			dir = dir.normalized()
@@ -96,7 +98,7 @@ func _physics_process(delta):
 				# Stand still
 				is_wandering = false
 				state_timer = randf_range(2.0, 4.0)
-				
+
 		if is_wandering:
 			velocity.x = wander_dir.x * (SPEED * 0.4)
 			velocity.z = wander_dir.z * (SPEED * 0.4)
@@ -109,7 +111,7 @@ func _physics_process(delta):
 	if velocity.length_squared() > 0.1:
 		var look_dir = atan2(-velocity.x, -velocity.z)
 		model.rotation.y = lerp_angle(model.rotation.y, look_dir, 10 * delta)
-		
+
 		# Procedural hopping/wobbling animation
 		time_passed += delta * 15.0
 		model.position.y = abs(sin(time_passed * 0.5)) * 0.3
@@ -119,7 +121,7 @@ func _physics_process(delta):
 		model.rotation.z = lerp(model.rotation.z, 0.0, 10 * delta)
 
 	move_and_slide()
-	
+
 	# Check for collisions with player (Removed game over logic)
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
@@ -127,6 +129,7 @@ func _physics_process(delta):
 		# if collider and collider.is_in_group("player"):
 		# 	if collider.has_method("die"):
 		# 		collider.die()
+
 
 func toggle_debug(show: bool):
 	if has_node("DebugMesh"):

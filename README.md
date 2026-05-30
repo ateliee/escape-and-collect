@@ -25,6 +25,34 @@ Godot Engine 4を使用して作成されています。
 ## ドキュメント
 ゲームの詳細な仕様については [docs/specifications.md](docs/specifications.md) をご参照ください（※仕様書は初期バージョンの状態の可能性があります）。
 
+## 開発ガイド (Development Guide)
+
+本プロジェクトでは GDScript のコードフォーマットおよびリント（静的解析）に [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit) を使用しています。
+コードをコミット・プッシュする前に、必ず以下の手順でフォーマットとリントを実行してください。
+
+### 1. gdlint / gdformat のインストール
+Python（pip）経由で `gdtoolkit` をインストールします。
+```bash
+pip3 install gdtoolkit
+```
+
+### 2. フォーマットとリントの実行
+プロジェクトルートディレクトリ（このREADMEがある場所）で以下のコマンドを実行します。
+
+- **自動フォーマットの実行（必須）**
+  ```bash
+  gdformat .
+  ```
+- **リント（構文・規約チェック）の実行**
+  ```bash
+  gdlint .
+  ```
+※ `gdlint .` 実行後にエラー（Error）や警告（Warning）が出た場合は修正してください。GitHub Actionsでも自動チェックが走ります。
+
+### AIアシスタント向け共通ルール
+本プロジェクトでは、AI開発支援ツール（Gemini, Cursor, Copilot, Windsurf など）向けに共通のコーディングルールや手順を定義したファイルを作成しています。
+AIツールを使用する場合は、事前に必ず **`AI_RULES.md`** を読み込ませるか、ルールファイルとして認識させてから作業を行ってください。
+
 ## Credits / Assets
 本プロジェクトは以下のオープンソースアセットを使用しています。
 - 3D Models downloaded from [Poly Pizza](https://poly.pizza/)
