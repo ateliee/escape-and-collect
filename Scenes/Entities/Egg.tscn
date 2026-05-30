@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://egg_uid1234"]
+
+[ext_resource type="Script" path="res://Scripts/Entities/Egg.gd" id="1_egg"]
+[ext_resource type="PackedScene" path="res://Assets/Models/egg.glb" id="2_model"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_egg"]
+radius = 0.3
+
+[node name="Egg" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_egg")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_egg")
+
+[node name="ModelRoot" type="Node3D" parent="."]
+transform = Transform3D(1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0, 0, 0, 0)
+
+[node name="egg" parent="ModelRoot" instance=ExtResource("2_model")]

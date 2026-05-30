@@ -47,10 +47,10 @@ func _physics_process(delta):
 
 	move_and_slide()
 	
-	# Check for collisions with player
+	# Check for collisions with player (Removed game over logic)
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
-		if collider and collider.is_in_group("player"):
-			if collider.has_method("die"):
-				collider.die()
+		# if collider and collider.is_in_group("player"):
+		# 	if collider.has_method("die"):
+		# 		collider.die()

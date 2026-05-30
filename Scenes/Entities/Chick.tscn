@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://bxy4tg6rmxc4p"]
+
+[ext_resource type="Script" uid="uid://ce6p1s8y1qamb" path="res://Scripts/Entities/Chick.gd" id="1_chick"]
+[ext_resource type="PackedScene" uid="uid://cupwqv2birita" path="res://Assets/Models/chick.glb" id="2_model"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_chick"]
+radius = 0.2
+height = 0.5
+
+[node name="Chick" type="CharacterBody3D" unique_id=1186443249]
+collision_layer = 0
+script = ExtResource("1_chick")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1119382033]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("CapsuleShape3D_chick")
+
+[node name="ModelRoot" type="Node3D" parent="." unique_id=563425108]
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
+
+[node name="chick" parent="ModelRoot" unique_id=293269097 instance=ExtResource("2_model")]
+transform = Transform3D(-0.899996, 0, -0.0026859886, 0, 0.9, 0, 0.0026859886, 0, -0.899996, 0, 44.252808, 0)

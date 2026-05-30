@@ -19,3 +19,6 @@ Godot Engine 4を使用して作成されています。
 ## アセット
 本プロジェクトは以下のオープンソースアセットを使用しています。
 - [Kenney Starter Kit 3D Platformer](https://kenney.nl/assets/starter-kit-3d-platformer) (CC0 License)
+
+## Credits / Assets
+- 3D Models downloaded from [Poly Pizza](https://poly.pizza/)

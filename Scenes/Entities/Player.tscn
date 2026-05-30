@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://cy81h46a78i2e"]
 
 [ext_resource type="Script" path="res://Scripts/Entities/Player.gd" id="1_player"]
-
+[ext_resource type="PackedScene" path="res://Assets/Models/chicken.glb" id="2_chicken"]
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_y1b2a"]
 radius = 0.4
 height = 1.0
@@ -26,13 +26,15 @@ script = ExtResource("1_player")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CapsuleShape3D_y1b2a")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("CapsuleMesh_body")
+[node name="ModelRoot" type="Node3D" parent="."]
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
+
+[node name="chicken" parent="ModelRoot" instance=ExtResource("2_chicken")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 
 [node name="SpringArm3D" type="SpringArm3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.5, -0.866025, 0, 0.866025, 0.5, 0, 1.5, 0)
-spring_length = 7.0
+spring_length = 15.0
 margin = 0.5
 
 [node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
