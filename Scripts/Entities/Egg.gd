@@ -42,3 +42,7 @@ func hatch():
 	# Spawn particle or effect here if desired
 	
 	queue_free()
+
+func toggle_debug(show: bool):
+	if has_node("DebugMesh"):
+		$DebugMesh.visible = show

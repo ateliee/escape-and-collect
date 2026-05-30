@@ -20,8 +20,8 @@ func _ready():
 	spring_arm.rotation_degrees = Vector3(-45, 0, 0)
 	spring_arm.spring_length = 15.0
 	
-	# Force fullscreen as requested
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	# Force maximized mode as requested (large but not a separate macOS space)
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 	
 	# Register action_throw if it hasn't been loaded from project.godot yet
 	if not InputMap.has_action("action_throw"):
@@ -77,7 +77,7 @@ func _physics_process(delta):
 	# Throwing logic (fallback to key check if action map fails)
 	if (Input.is_action_just_pressed("action_throw") or Input.is_key_pressed(KEY_E) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) and throw_cooldown <= 0:
 		throw_egg()
-		throw_cooldown = 0.5
+		throw_cooldown = 0.1
 
 func throw_egg():
 	var egg_scene = preload("res://Scenes/Entities/Egg.tscn")
@@ -91,7 +91,7 @@ func throw_egg():
 	# Set position BEFORE adding to tree to avoid physics state errors
 	egg.position = global_position + Vector3(0, 1.0, 0) + throw_dir * 0.5
 	
-	var throw_force = 12.0
+	var throw_force = 6.0
 	throw_dir.y = 1.0 # arc upwards
 	egg.linear_velocity = throw_dir.normalized() * throw_force
 	
@@ -120,3 +120,7 @@ func die():
 	var world = get_parent()
 	if world.has_method("trigger_game_over"):
 		world.trigger_game_over()
+
+func toggle_debug(show: bool):
+	if has_node("DebugMesh"):
+		$DebugMesh.visible = show

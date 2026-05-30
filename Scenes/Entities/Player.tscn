@@ -38,3 +38,17 @@ spring_length = 15.0
 margin = 0.5
 
 [node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
+transparency = 1
+albedo_color = Color(0, 0, 1, 0.4)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_player_debug"]
+material = SubResource("StandardMaterial3D_blue")
+radius = 0.4
+height = 1.0
+
+[node name="DebugMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+visible = false
+mesh = SubResource("CapsuleMesh_player_debug")

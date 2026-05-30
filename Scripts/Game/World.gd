@@ -14,6 +14,9 @@ var player_scene = preload("res://Scenes/Entities/Player.tscn")
 var player: Node3D
 @onready var floor_node = $Floor
 
+var debug_btn: Button
+var is_debug_sphere_on = false
+
 func _ready():
 	# Spawn player
 	player = player_scene.instantiate()
@@ -50,23 +53,34 @@ func _ready():
 		var canvas = CanvasLayer.new()
 		canvas.layer = 100 # Ensure it renders on top
 		add_child(canvas)
-		var btn = Button.new()
-		btn.text = "Toggle Debug Sphere"
+		debug_btn = Button.new()
 		
 		# Better layout system for responsive fullscreen UI
-		btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-		btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		btn.offset_right = -20
-		btn.offset_top = 20
+		debug_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		debug_btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		debug_btn.offset_right = -20
+		debug_btn.offset_top = 20
 		
-		btn.pressed.connect(_on_debug_toggle)
-		canvas.add_child(btn)
+		debug_btn.pressed.connect(_on_debug_toggle)
+		canvas.add_child(debug_btn)
+		_update_debug_btn_visuals()
+
+func _update_debug_btn_visuals():
+	if is_debug_sphere_on:
+		debug_btn.text = "Debug Sphere: ON"
+		debug_btn.modulate = Color(0.5, 1.0, 0.5) # Light Green
+	else:
+		debug_btn.text = "Debug Sphere: OFF"
+		debug_btn.modulate = Color(1.0, 0.6, 0.6) # Light Red
 
 func _on_debug_toggle():
+	is_debug_sphere_on = not is_debug_sphere_on
+	_update_debug_btn_visuals()
+	
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	for enemy in enemies:
 		if enemy.has_method("toggle_debug"):
-			enemy.toggle_debug(not enemy.get_node("DebugMesh").visible)
+			enemy.toggle_debug(is_debug_sphere_on)
 
 func _process(_delta):
 	if is_instance_valid(player):
@@ -97,6 +111,8 @@ func _on_enemy_spawn_timer():
 	var enemy = enemy_scene.instantiate()
 	enemy.position = get_random_position()
 	add_child(enemy)
+	if enemy.has_method("toggle_debug"):
+		enemy.toggle_debug(is_debug_sphere_on)
 	current_enemies += 1
 
 func _cleanup_distant_objects():

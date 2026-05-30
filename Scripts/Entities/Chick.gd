@@ -51,3 +51,7 @@ func _physics_process(delta):
 		model.rotation.z = lerp(model.rotation.z, 0.0, 15 * delta)
 
 	move_and_slide()
+
+func toggle_debug(show: bool):
+	if has_node("DebugMesh"):
+		$DebugMesh.visible = show
