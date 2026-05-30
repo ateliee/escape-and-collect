@@ -62,10 +62,8 @@ func _physics_process(delta):
 	if not is_on_floor():
 		velocity.y -= ProjectSettings.get_setting("physics/3d/default_gravity") * delta
 
-	# Find closest valid target within vision range
-	var targets = get_tree().get_nodes_in_group("chick").duplicate()
-	if is_instance_valid(player):
-		targets.append(player)
+	# Find closest valid target within vision range (Chicks only)
+	var targets = get_tree().get_nodes_in_group("chick")
 		
 	var closest_target = null
 	var closest_dist = 15.0 # Vision radius
