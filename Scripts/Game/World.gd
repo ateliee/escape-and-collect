@@ -16,6 +16,7 @@ var player: Node3D
 
 var debug_btn: Button
 var is_debug_sphere_on = true
+var chick_count_label: Label
 
 func _ready():
 	# Spawn player
@@ -48,6 +49,25 @@ func _ready():
 	cleanup_timer.autostart = true
 	cleanup_timer.timeout.connect(_cleanup_distant_objects)
 	add_child(cleanup_timer)
+
+	var hud_canvas = CanvasLayer.new()
+	hud_canvas.layer = 90
+	add_child(hud_canvas)
+	
+	chick_count_label = Label.new()
+	chick_count_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	chick_count_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	chick_count_label.offset_left = 30
+	chick_count_label.offset_bottom = -30
+	chick_count_label.add_theme_font_size_override("font_size", 48)
+	chick_count_label.add_theme_color_override("font_outline_color", Color(0,0,0,1))
+	chick_count_label.add_theme_constant_override("outline_size", 8)
+	hud_canvas.add_child(chick_count_label)
+	
+	# Add minimap
+	var minimap_scene = preload("res://Scenes/UI/Minimap.tscn")
+	var minimap = minimap_scene.instantiate()
+	hud_canvas.add_child(minimap)
 
 	if OS.is_debug_build():
 		var canvas = CanvasLayer.new()
@@ -89,6 +109,10 @@ func _on_debug_toggle():
 	get_tree().call_group("egg", "toggle_debug", is_debug_sphere_on)
 
 func _process(_delta):
+	if is_instance_valid(chick_count_label):
+		var count = get_tree().get_nodes_in_group("chick").size()
+		chick_count_label.text = "Chicks: " + str(count)
+
 	if is_instance_valid(player):
 		# Move floor smoothly to follow player without snapping to prevent shadow flicker
 		floor_node.global_position = Vector3(player.global_position.x, -0.5, player.global_position.z)
@@ -97,10 +121,20 @@ func get_random_position() -> Vector3:
 	if not is_instance_valid(player):
 		return Vector3(0, 0.0, 0)
 	
-	var angle = randf() * TAU
-	var dist = randf_range(15.0, 35.0)
-	var pos = player.global_position + Vector3(cos(angle) * dist, 0.0, sin(angle) * dist)
-	pos.y = 0.0
+	var camera = player.get_node_or_null("SpringArm3D/Camera3D")
+	var pos = Vector3.ZERO
+	
+	# Try up to 10 times to find a spot outside the camera's view
+	for i in range(10):
+		var angle = randf() * TAU
+		var dist = randf_range(35.0, 50.0)
+		pos = player.global_position + Vector3(cos(angle) * dist, 0.0, sin(angle) * dist)
+		pos.y = 0.0
+		
+		# If the position is NOT in the camera's view (or if no camera is found), accept it
+		if camera == null or not camera.is_position_in_frustum(pos):
+			break
+			
 	return pos
 
 func spawn_coin():
