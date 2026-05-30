@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://d6r5v4x3n2s1m"]
 
 [ext_resource type="Script" path="res://Scripts/Entities/Coin.gd" id="1_coin"]
-[ext_resource type="PackedScene" uid="uid://dxx1n0d0y1y03" path="res://Assets/Models/coin.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://Assets/Models/coin.glb" id="2_model"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_a1b2c"]
 radius = 0.5
