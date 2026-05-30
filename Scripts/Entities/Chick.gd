@@ -5,6 +5,7 @@ var player: Node3D = null
 var offset_dir = Vector3.ZERO
 var current_state: String = "follow"
 var time_passed = 0.0
+var panic_label: Label3D
 
 @onready var model = $ModelRoot
 
@@ -20,7 +21,6 @@ func _ready():
 	var angle = randf() * TAU
 	offset_dir = Vector3(cos(angle), 0, sin(angle)) * randf_range(1.0, 2.5)
 
-	# Setup alert visualizer
 	var vision_mesh = MeshInstance3D.new()
 	vision_mesh.name = "VisionMesh"
 	var sphere_mesh = SphereMesh.new()
@@ -34,6 +34,17 @@ func _ready():
 	vision_mesh.mesh = sphere_mesh
 	vision_mesh.visible = false
 	add_child(vision_mesh)
+
+	# Setup panic indicator
+	panic_label = Label3D.new()
+	panic_label.text = "!"
+	panic_label.modulate = Color(1, 0.2, 0.2)  # Red
+	panic_label.font_size = 200
+	panic_label.outline_size = 15
+	panic_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	panic_label.position = Vector3(0, 1.2, 0)
+	panic_label.visible = false
+	add_child(panic_label)
 
 
 func _physics_process(delta):
@@ -84,8 +95,8 @@ func _physics_process(delta):
 		dir.y = 0
 		if dir.length() > 0.1:
 			dir = dir.normalized()
-			target_vel_x = dir.x * (SPEED * 1.5)
-			target_vel_z = dir.z * (SPEED * 1.5)
+			target_vel_x = dir.x * 5.0
+			target_vel_z = dir.z * 5.0
 			is_moving = true
 			look_dir = atan2(-dir.x, -dir.z)
 
@@ -142,6 +153,13 @@ func _physics_process(delta):
 		model.rotation.z = lerp(model.rotation.z, 0.0, 15 * delta)
 
 	move_and_slide()
+
+	if is_instance_valid(panic_label):
+		if current_state == "flee":
+			panic_label.visible = true
+			panic_label.position.y = 1.2 + abs(sin(time_passed * 1.5)) * 0.2
+		else:
+			panic_label.visible = false
 
 
 func toggle_debug(show: bool):

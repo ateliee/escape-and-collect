@@ -1,17 +1,21 @@
 extends CharacterBody3D
 
-const SPEED = 3.0
+const SPEED = 7.5
 
 var player: Node3D = null
 var time_passed: float = 0.0
 var state_timer: float = 0.0
 var wander_dir: Vector3 = Vector3.ZERO
 var is_wandering: bool = false
+var is_eating: bool = false
+var eat_timer: float = 0.0
+var original_scale: Vector3
 
 @onready var model = $ModelRoot
 
 
 func _ready():
+	original_scale = model.scale
 	# Find player
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
@@ -46,7 +50,9 @@ func _ready():
 
 
 func _on_eat_area_entered(body: Node3D):
-	if body.is_in_group("chick"):
+	if body.is_in_group("chick") and not is_eating:
+		is_eating = true
+		eat_timer = 2.0
 		var effect = preload("res://Scenes/Entities/EggHatchEffect.tscn").instantiate()
 		effect.position = body.global_position
 		get_parent().call_deferred("add_child", effect)
@@ -77,48 +83,66 @@ func _physics_process(delta):
 			closest_dist = dist
 			closest_target = t
 
-	# Pursuit towards target if found
-	if closest_target:
-		var dir = closest_target.global_position - global_position
-		dir.y = 0
-		if dir.length() > 0.1:
-			dir = dir.normalized()
-		velocity.x = dir.x * SPEED
-		velocity.z = dir.z * SPEED
-	else:
-		state_timer -= delta
-		if state_timer <= 0:
-			if randf() > 0.5:
-				# Wander around
-				is_wandering = true
-				state_timer = randf_range(2.0, 5.0)
-				var angle = randf() * TAU
-				wander_dir = Vector3(cos(angle), 0, sin(angle))
-			else:
-				# Stand still
-				is_wandering = false
-				state_timer = randf_range(2.0, 4.0)
+	if is_eating:
+		eat_timer -= delta
+		if eat_timer <= 0:
+			is_eating = false
 
-		if is_wandering:
-			velocity.x = wander_dir.x * (SPEED * 0.4)
-			velocity.z = wander_dir.z * (SPEED * 0.4)
+		velocity.x = 0
+		velocity.z = 0
+
+		# Munching animation (Subtle)
+		time_passed += delta * 20.0
+		var anim_scale = Vector3(
+			1.0 + sin(time_passed) * 0.1, 1.0 + cos(time_passed) * 0.1, 1.0 + sin(time_passed) * 0.1
+		)
+		model.scale = original_scale * anim_scale
+		model.position.y = abs(sin(time_passed)) * 0.1
+	else:
+		model.scale = model.scale.lerp(original_scale, 10 * delta)
+
+		# Pursuit towards target if found
+		if closest_target:
+			var dir = closest_target.global_position - global_position
+			dir.y = 0
+			if dir.length() > 0.1:
+				dir = dir.normalized()
+			velocity.x = dir.x * SPEED
+			velocity.z = dir.z * SPEED
 		else:
-			# Decelerate if standing still
-			velocity.x = move_toward(velocity.x, 0, SPEED * 5.0 * delta)
-			velocity.z = move_toward(velocity.z, 0, SPEED * 5.0 * delta)
+			state_timer -= delta
+			if state_timer <= 0:
+				if randf() > 0.5:
+					# Wander around
+					is_wandering = true
+					state_timer = randf_range(2.0, 5.0)
+					var angle = randf() * TAU
+					wander_dir = Vector3(cos(angle), 0, sin(angle))
+				else:
+					# Stand still
+					is_wandering = false
+					state_timer = randf_range(2.0, 4.0)
 
-	# Rotate to face movement and animate
-	if velocity.length_squared() > 0.1:
-		var look_dir = atan2(-velocity.x, -velocity.z)
-		model.rotation.y = lerp_angle(model.rotation.y, look_dir, 10 * delta)
+			if is_wandering:
+				velocity.x = wander_dir.x * (SPEED * 0.4)
+				velocity.z = wander_dir.z * (SPEED * 0.4)
+			else:
+				# Decelerate if standing still
+				velocity.x = move_toward(velocity.x, 0, SPEED * 5.0 * delta)
+				velocity.z = move_toward(velocity.z, 0, SPEED * 5.0 * delta)
 
-		# Procedural hopping/wobbling animation
-		time_passed += delta * 15.0
-		model.position.y = abs(sin(time_passed * 0.5)) * 0.3
-		model.rotation.z = sin(time_passed) * 0.15
-	else:
-		model.position.y = lerp(model.position.y, 0.0, 10 * delta)
-		model.rotation.z = lerp(model.rotation.z, 0.0, 10 * delta)
+		# Rotate to face movement and animate
+		if velocity.length_squared() > 0.1:
+			var look_dir = atan2(-velocity.x, -velocity.z)
+			model.rotation.y = lerp_angle(model.rotation.y, look_dir, 10 * delta)
+
+			# Procedural hopping/wobbling animation
+			time_passed += delta * 15.0
+			model.position.y = abs(sin(time_passed * 0.5)) * 0.3
+			model.rotation.z = sin(time_passed) * 0.15
+		else:
+			model.position.y = lerp(model.position.y, 0.0, 10 * delta)
+			model.rotation.z = lerp(model.rotation.z, 0.0, 10 * delta)
 
 	move_and_slide()
 
