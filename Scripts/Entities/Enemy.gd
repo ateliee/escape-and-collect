@@ -54,3 +54,7 @@ func _physics_process(delta):
 		# if collider and collider.is_in_group("player"):
 		# 	if collider.has_method("die"):
 		# 		collider.die()
+
+func toggle_debug(show: bool):
+	if has_node("DebugMesh"):
+		$DebugMesh.visible = show

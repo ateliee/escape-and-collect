@@ -46,6 +46,28 @@ func _ready():
 	cleanup_timer.timeout.connect(_cleanup_distant_objects)
 	add_child(cleanup_timer)
 
+	if OS.is_debug_build():
+		var canvas = CanvasLayer.new()
+		canvas.layer = 100 # Ensure it renders on top
+		add_child(canvas)
+		var btn = Button.new()
+		btn.text = "Toggle Debug Sphere"
+		
+		# Better layout system for responsive fullscreen UI
+		btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		btn.offset_right = -20
+		btn.offset_top = 20
+		
+		btn.pressed.connect(_on_debug_toggle)
+		canvas.add_child(btn)
+
+func _on_debug_toggle():
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if enemy.has_method("toggle_debug"):
+			enemy.toggle_debug(not enemy.get_node("DebugMesh").visible)
+
 func _process(_delta):
 	if is_instance_valid(player):
 		# Move floor smoothly to follow player without snapping to prevent shadow flicker
